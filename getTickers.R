@@ -60,5 +60,42 @@ run_ <- function() {
   paste0("C:\\Users\\kim_t\\Desktop\\algo\\tickers_", 
   substr(time_, 1,  10), "_", gsub("[[:punct:]]", "", substr(time_, 12, 22)), 
   ".csv"))
+  
+  existent_    <- vector()
+  nonexistent_ <- vector()
+  for (i in 1:dim(tickers_)[1]) {
+    
+    skip_ <- FALSE
+    print(paste0(i, " out of ", dim(tickers_)[1]))
+    
+    tryCatch(
+      
+      temp_ <- quantmod::getQuote(tickers_$ticker[i]),
+      
+      error = function(e) { skip_ <<- TRUE}
+    )
+    if (skip_) { 
+      
+      print(paste0("Error at ", i))
+      nonexistent_ <- c(nonexistent_, tickers_$ticker[i])
+      next 
+    }
+    else {
+      
+      existent_ <- c(existent_, tickers_$ticker[i])
+    }
+  }
+  existent_    <<- existent_
+  nonexistent_ <<- nonexistent_
+  
+  write.csv(tickers_ %>% filter(ticker %in% existent_), 
+  paste0("C:\\Users\\kim_t\\Desktop\\algo\\yahooTickers_", 
+  substr(time_, 1,  10), "_", gsub("[[:punct:]]", "", substr(time_, 12, 22)), 
+  ".csv"))
+  
+  write.csv(tickers_ %>% filter(ticker %in% nonexistent_), 
+  paste0("C:\\Users\\kim_t\\Desktop\\algo\\yahooTickersMissing_", 
+  substr(time_, 1,  10), "_", gsub("[[:punct:]]", "", substr(time_, 12, 22)), 
+  ".csv"))
 }
 run_()
